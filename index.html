@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wildroot — Forest Edge Farmyard</title>
+<style>
+  :root{color-scheme:dark;--ink:#eee4c9;--muted:#a9b59a;--gold:#d7b975;--panel:#18251f}
+  *{box-sizing:border-box}body{margin:0;background:#101a17;color:var(--ink);font-family:Georgia,serif;min-height:100vh;display:grid;place-items:center;padding:24px}
+  main{width:min(1120px,100%)}header{display:flex;align-items:center;justify-content:space-between;margin-bottom:17px;gap:16px}h1{font-size:30px;letter-spacing:6px;margin:0;color:#e4d4a7;font-weight:normal}h1 span{font-size:11px;letter-spacing:3px;display:block;margin-top:7px;color:var(--muted)}.chapter{text-align:right;font:11px/1.8 monospace;letter-spacing:2px;color:var(--muted)}.chapter b{color:var(--gold);font-weight:normal}
+  .bar{display:flex;justify-content:space-between;align-items:center;gap:18px;border:1px solid #485344;background:var(--panel);padding:15px 20px;margin-bottom:10px;min-height:72px}.eyebrow{font:10px monospace;letter-spacing:2px;color:var(--gold);margin-bottom:7px}#objective{font-size:16px}
+  .stage{position:relative;background:#17291f;border:1px solid #626447;box-shadow:0 12px 45px #0005;overflow:hidden}canvas{display:block;width:100%;height:auto;image-rendering:pixelated;image-rendering:crisp-edges;outline:none;touch-action:none}.tag{position:absolute;top:16px;left:17px;background:#132119dd;border:1px solid #82906b66;padding:9px 12px;font:10px monospace;letter-spacing:2px;pointer-events:none;color:#e0d7b7}.tag span{color:#b9c995;margin-left:12px}#toast{position:absolute;bottom:65px;left:50%;transform:translateX(-50%);padding:10px 16px;background:#17251feb;border:1px solid #8a9569;color:#f1e5bf;font:12px monospace;text-align:center;max-width:90%;pointer-events:none;opacity:0;transition:opacity .15s}#toast.show{opacity:1}#prompt{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);background:#14211dec;border:1px solid #a9ab7d;padding:10px 16px;white-space:nowrap;font:12px monospace;color:#efe7cd;pointer-events:none}kbd{display:inline-block;min-width:23px;padding:3px 5px;background:#304137;border:1px solid #70816a;border-bottom:3px solid #70816a;border-radius:3px;color:#f1e8cc;font:11px monospace;text-align:center;margin-right:5px}
+  footer{display:flex;justify-content:space-between;gap:16px;align-items:center;padding:17px 2px;color:var(--muted);font:11px monospace}footer>div{display:flex;gap:16px;align-items:center}#tool{color:#d6c391}.note{text-align:right;color:#7f927f;font-size:10px}button{font:12px monospace;background:#d4bc80;color:#233126;border:1px solid #f1dc9c;padding:13px 23px;cursor:pointer}button:hover{background:#f0d89d}button:focus-visible{outline:3px solid #fff;outline-offset:4px}
+  #touch{display:none;position:absolute;bottom:62px;left:14px;gap:4px;grid-template-columns:repeat(3,36px);z-index:2}#touch button{padding:9px 0;background:#223d2bcc;color:#eddfba;border-color:#91a077;touch-action:none;user-select:none}#touch button:first-child{grid-column:2}#touch button:nth-child(2){grid-column:1}#touch .act{grid-column:3;grid-row:1} @media(pointer:coarse){#touch{display:grid}.note{display:none}}@media(max-width:650px){body{padding:10px}h1{font-size:23px}.chapter{font-size:9px}.bar{padding:12px;gap:8px}#objective{font-size:13px}footer{flex-wrap:wrap;font-size:10px}footer>div{gap:9px}.tag{font-size:8px;top:9px;left:9px;padding:7px}#prompt{font-size:10px;padding:7px}#toast{font-size:10px}}
+  .game-layout{display:grid;grid-template-columns:minmax(0,1fr) 92px;gap:10px;align-items:stretch}.side{background:#18251f;border:1px solid #626447;padding:7px;display:flex;flex-direction:column;gap:5px;justify-content:space-between}.side-title{font:9px monospace;text-align:center;letter-spacing:2px;color:var(--gold)}.slot{position:relative;background:#22342a;border:1px solid #53634c;color:#cbd5b8;padding:4px;min-height:44px;display:flex;align-items:center;justify-content:center;gap:4px;cursor:pointer}.slot:hover{background:#304735}.slot.selected{border-color:#e8cb83;box-shadow:inset 0 0 0 1px #e8cb83;background:#3c4931}.slot .item-icon{width:27px;height:27px;flex:0 0 27px;image-rendering:pixelated}.slot-key{position:absolute;top:2px;left:4px;color:#b5b494;font:9px monospace}.slot-qty{position:absolute;bottom:2px;right:4px;font:11px monospace;color:#f0dfb1}.slot-caption{font:8px monospace;color:#c6b984}.bag-toggle{padding:6px 12px;font:11px monospace;background:#293e30;color:#e4d5ae;border-color:#6d7955}#bag{position:absolute;inset:0;z-index:2;background:#111e18e8;display:grid;place-items:center;padding:15px}#bag[hidden]{display:none}.bag-card{width:min(520px,100%);background:#203228;border:1px solid #a8a175;padding:23px}.bag-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.bag-head h2{margin:0;font-size:24px;font-weight:normal}.bag-head button{padding:5px 9px;background:#304334;color:#ece0bd}.bag-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin:18px 0}.bag-grid .slot{height:58px}.bag-help{font:11px/1.7 monospace;color:#b7c5a6;margin:10px 0}#item-description{min-height:40px;color:#e4d3a5}.bag-empty{font:10px monospace;color:#809379}.stage{min-width:0;align-self:center}#tool{font-size:10px}
+  @media(max-width:700px){.game-layout{grid-template-columns:1fr}.side{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));padding:5px;gap:3px}.side-title{display:none}.slot{min-width:0;min-height:48px}.slot .item-icon{width:23px;height:23px;flex-basis:23px}.slot-key{font-size:8px}.slot-caption{display:none}.bag-card{padding:13px}.bag-head h2{font-size:18px}.bag-grid{gap:3px;margin:10px 0}.bag-grid .slot{height:43px}.bag-help{font-size:9px;margin:6px 0}#item-description{min-height:26px}}
+  .seed-picker{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 10px;padding:9px 12px;background:#18251f;border:1px solid #485344}.seed-picker>span{font:10px monospace;color:#c9b782;letter-spacing:1px;margin-right:6px}.seed-choice{display:flex;align-items:center;gap:6px;padding:5px 10px;background:#263a2d;color:#c5d1b4;border:1px solid #54694c;font:11px monospace}.seed-choice[aria-pressed="true"]{border-color:#e3c783;color:#f2dfaf;background:#3b4930}.seed-choice canvas{width:22px;height:22px}.seed-choice small{color:#a7ba98}.seed-picker .seed-hint{margin-left:auto;letter-spacing:0;color:#9caf94;font-size:9px}@media(max-width:700px){.seed-picker{padding:6px;gap:4px}.seed-choice{font-size:9px;padding:4px 6px;gap:3px}.seed-choice canvas{width:18px;height:18px}.seed-picker .seed-hint{width:100%;margin:3px 0 0}}
+.bag-grid{grid-template-columns:repeat(8,minmax(0,1fr))}.bag-grid .slot{height:43px;min-height:38px}.bag-card{max-height:100%;overflow:auto}.bag-actions{display:flex;flex-wrap:wrap;gap:8px}.bag-actions button{padding:8px 10px;font-size:10px}.slot.drop-target{border-color:#f5e2a4;background:#506849;outline:2px solid #e0c780}.slot[draggable="true"]{cursor:grab}.slot[draggable="true"]:active{cursor:grabbing}@media(max-width:700px){.bag-grid{grid-template-columns:repeat(6,minmax(0,1fr))}.bag-grid .slot{height:37px;min-height:34px}.bag-card{padding:10px}.bag-head h2{font-size:15px}}
+#touch .pickup{grid-column:3;grid-row:3}#touch .act{font-size:8px}footer>div{flex-wrap:wrap}
+  #unregister-hint{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:10;max-width:90vw;padding:12px 18px;border:1px dashed #dfc582;background:#263b2bf0;color:#f0dbac;font:12px/1.5 monospace;text-align:center;pointer-events:none}
+  #land-count{position:absolute;top:16px;right:16px;padding:9px 11px;background:#132119dd;border:1px solid #82906b66;color:#dddbad;font:10px monospace;pointer-events:none}@media(max-width:650px){#land-count{top:35px;right:9px;font-size:8px;padding:5px}.tag{letter-spacing:1px}}
+</style>
+</head>
+<body>
+<main>
+  <header><h1>WILDROOT<span>A HERBALIST'S TALE</span></h1><div class="chapter"><b>CHAPTER 01</b><br>FOREST EDGE FARMYARD</div></header>
+  <section class="bar" aria-label="Hướng dẫn làm vườn"><div><div class="eyebrow">YOUR FARM</div><div id="objective">Đứng gần ô đất, chọn cuốc và chuột phải để sới đất.</div></div></section>
+  <div class="game-layout"><div class="stage">
+    <canvas id="game" width="960" height="576" tabindex="0" aria-label="Wildroot farming game. Move with WASD or arrow keys. Right click to use the selected hotbar item. Stand within two tiles to till soil. Press E to pick up items."></canvas>
+    <div class="tag">FOREST EDGE <span>DAY 01 · MORNING</span></div>
+    <div id="land-count">ĐẤT ĐÃ MỞ · 9 ô</div>
+    <div id="toast" role="status" aria-live="polite"></div>
+    <div id="prompt"><kbd>W A S D</kbd> Explore your farm</div>
+    <div id="touch" aria-label="Touch controls"><button data-key="ArrowUp" aria-label="Move up">↑</button><button data-key="ArrowLeft" aria-label="Move left">←</button><button data-key="ArrowDown" aria-label="Move down">↓</button><button data-key="ArrowRight" aria-label="Move right">→</button><button class="act" data-key="UseItem" aria-label="Dùng dụng cụ">Dùng</button><button class="pickup" data-key="KeyE" aria-label="Nhặt đồ">E</button></div>
+    <section id="bag" hidden aria-label="Túi đồ"><div class="bag-card"><div class="bag-head"><h2 id="bag-capacity">Túi đồ · 24 ô</h2><button id="close-bag" aria-label="Đóng túi đồ">✕</button></div><div class="bag-grid" id="bag-grid"></div><p class="bag-help" id="item-description"></p><div class="bag-actions"><button id="assign-selected">Gán lối tắt</button><button id="clear-shortcut">Gỡ ô công cụ</button></div><p class="bag-help">Kéo từ túi sang thanh bên để gán / chuyển lối tắt.<br>Kéo từ thanh bên ra ngoài để gỡ. Ô đích có đồ sẽ đổi chỗ.<br>1–9 chọn ô công cụ<br>Chuột phải: dùng · E: nhặt đồ dưới đất<br>I / Esc: đóng túi · Game tạm dừng khi mở túi.</p></div></section>
+  </div>
+  <aside class="side" id="sidebar" aria-label="Thanh 9 ô"><div class="side-title">TÚI ĐỒ</div></aside></div>
+  <footer><div><span><kbd>WASD</kbd><kbd>↑↓←→</kbd> Move</span><span><kbd>E</kbd> Nhặt đồ</span><button id="open-bag" class="bag-toggle">Túi đồ [I]</button><button id="restart" class="bag-toggle">Chơi lại ↻</button><span id="tool">CÔNG CỤ · Túi hạt giống</span></div><span class="note">1–9 chọn công cụ · Chuột phải dùng · I mở túi</span></footer>
+</main>
+<div id="unregister-hint" hidden>Thả ra ngoài thanh công cụ để gỡ lối tắt.<br>Vật phẩm vẫn được giữ trong túi · Esc để hủy kéo.</div>
+<script>
+'use strict';
+// WILDROOT v1.0 — one file, no assets, no dependencies.
+// V0.1: World & collision | V0.2: Camera & animation | V0.3: Farming
+// V0.4: Quest & completion | V1.0: Pixel art, feedback & responsive controls
+const TILE=32, VIEW_W=960, VIEW_H=576;
+const PALETTE={grass:'#58784b',light:'#6b8a56',dark:'#476940',ink:'#263e32',soil:'#70503b',soilDark:'#503e30',wood:'#806044',gold:'#d6be7e'};
+const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
+ctx.imageSmoothingEnabled=false;
+function rect(c,x,y,w,h,color){c.fillStyle=color;c.fillRect(Math.round(x),Math.round(y),w,h);}
+function hash(x,y,s=0){let n=Math.imul(x+127,374761393)^Math.imul(y+311,668265263)^s;n=Math.imul(n^(n>>>13),1274126177);return((n^(n>>>16))>>>0)/4294967296;}
+function shadow(c,x,y,w=24){rect(c,x-w/2,y,w,5,'#283f324b');}
+
+// INVENTORY stores items; HOTBAR only stores references to item types.
+const CROPS={
+  mint:{name:'Bạc hà',growTime:5,leaf:'#85b970',light:'#b6d58c',flower:'#cee6aa',shape:'leaf'},
+  chamomile:{name:'Cúc La Mã',growTime:7,leaf:'#79a65f',light:'#abc77d',flower:'#f3e9c0',shape:'daisy'},
+  lavender:{name:'Oải hương',growTime:9,leaf:'#77987a',light:'#a2bc95',flower:'#b4a0dd',shape:'spike'},
+  sage:{name:'Xô thơm',growTime:11,leaf:'#88a99b',light:'#b8cbb0',flower:'#d2a4c7',shape:'broad'}
+};
+const ITEMS={
+  axe:{name:'Rìu',tool:true,description:'Đứng gần cây (tối đa 2 ô), trỏ chuột vào thân cây rồi chuột phải để chặt. Cây rơi ra 2 gỗ và 3 lá; nhấn E để nhặt.'},
+  wood:{name:'Gỗ',tool:false,description:'Gỗ nhặt được sau khi chặt cây.'},
+  leaves:{name:'Lá cây',tool:false,description:'Lá cây nhặt được sau khi chặt cây.'},
+  pickaxe:{name:'Cuốc chim',tool:true,description:'Đứng gần tảng đá (tối đa 2 ô), trỏ chuột vào đá rồi chuột phải để đập. Nhấn E gần đá nhỏ rơi ra để nhặt.'},
+  stone:{name:'Đá nhỏ',tool:false,description:'Vật liệu nhận được khi đập đá bằng cuốc chim. Mỗi tảng đá cho 3 đá nhỏ.'},
+  hoe:{name:'Cuốc',tool:true,description:'Đứng cách tâm ô đất tối đa 64 px (2 ô), trỏ chuột vào ô rồi chuột phải để cuốc miễn phí. Mỗi ô 32×32 trồng được 1 cây.'},
+  seeds:{name:'Túi gieo hạt',tool:true,description:'Chọn giống ở thanh phía trên rồi gieo vào luống đã cuốc. Mỗi lần gieo tốn 1 hạt cùng loại trong túi.'},
+  water:{name:'Bình tưới',tool:true,description:'Tưới luống đã gieo. Bình luôn đầy trong Level 1.'},
+  sickle:{name:'Liềm hái',tool:true,description:'Cắt cây thuốc đã chín. Nhấn E gần vật phẩm rơi để nhặt vào túi.'},
+  ...Object.fromEntries(Object.entries(CROPS).map(([id,crop])=>[id,{name:crop.name,tool:false,description:'Hoa '+crop.name+' vừa nhặt. Cất trong túi sau khi hái hoặc thu hoạch.'}])),
+  ...Object.fromEntries(Object.entries(CROPS).map(([id,crop])=>[id+'_seed',{name:'Hạt '+crop.name,tool:true,crop:id,description:'Cuốc đất trước, rồi kéo hạt ra thanh công cụ và chuột phải để gieo '+crop.name+'. Mỗi bông hoa nhặt được có 25% cơ hội cho thêm 1 hạt.'}]))
+};
+function drawHerb(c,x,y,crop,progress){const h=5+Math.floor(progress*10),top=y-h;rect(c,x,top,2,h+2,crop.light);rect(c,x-6,top+4,6,3,crop.leaf);rect(c,x+2,top+1,6,3,crop.light);if(progress<.5)return;
+  if(crop.shape==='leaf'){rect(c,x-8,top-4,8,5,crop.leaf);rect(c,x+2,top-7,7,5,crop.light);rect(c,x-5,top-3,5,1,crop.light);}
+  else if(crop.shape==='daisy'){for(const dx of [-5,5]){rect(c,x+dx-2,top-5,6,2,crop.flower);rect(c,x+dx,top-7,2,6,crop.flower);rect(c,x+dx,top-5,2,2,'#e6bd5a');}rect(c,x,top-7,2,7,crop.light);}
+  else if(crop.shape==='spike'){for(const dx of [-5,0,5]){rect(c,x+dx,top-8,2,12,crop.leaf);rect(c,x+dx-1,top-8,4,3,crop.flower);rect(c,x+dx-2,top-4,5,3,crop.flower);}}
+  else{rect(c,x-8,top-3,8,6,crop.leaf);rect(c,x+2,top-7,8,6,crop.light);rect(c,x-6,top-1,6,1,crop.light);rect(c,x+3,top-10,3,3,crop.flower);}
+}
+function itemIcon(id,seedType='mint'){const icon=document.createElement('canvas');icon.width=24;icon.height=24;icon.className='item-icon';icon.setAttribute('aria-hidden','true');const c=icon.getContext('2d');c.imageSmoothingEnabled=false;
+  if(id==='water'){rect(c,5,10,13,11,'#6d9caa');rect(c,5,12,13,3,'#a2c3c1');rect(c,17,9,5,4,'#7ea8b1');rect(c,20,6,3,5,'#a2c3c1');rect(c,7,4,9,3,'#c8c6a0');rect(c,6,5,3,7,'#c8c6a0');rect(c,14,5,3,7,'#c8c6a0');}
+  if(id==='sickle'){rect(c,7,13,4,10,'#b18a57');rect(c,9,3,10,3,'#d1d5b8');rect(c,17,5,4,7,'#a3b4a4');rect(c,13,11,7,3,'#d1d5b8');rect(c,9,12,6,3,'#d1d5b8');}
+  if(id==='hoe'){rect(c,10,4,3,18,'#af8350');rect(c,11,4,1,16,'#dcc18a');rect(c,5,4,15,4,'#a4b7ad');rect(c,4,7,8,5,'#758e86');rect(c,4,7,2,5,'#d0d5b8');rect(c,14,4,6,2,'#d0d5b8');}
+  if(id==='seeds'){rect(c,6,8,13,13,'#ab8856');rect(c,8,5,9,5,'#d2b77c');rect(c,7,9,11,2,'#72533b');rect(c,10,13,3,3,'#e8d28d');rect(c,14,16,2,3,'#e8d28d');}
+  if(id==='axe'){rect(c,10,7,3,16,'#af8350');rect(c,11,8,1,13,'#dcc18a');rect(c,5,4,12,4,'#a4b7ad');rect(c,4,7,7,5,'#758e86');rect(c,5,4,9,1,'#d0d5b8');}
+  if(id==='wood'){rect(c,4,8,16,10,'#805d3c');rect(c,5,9,14,3,'#ad8150');rect(c,6,14,12,2,'#674a34');rect(c,16,9,3,8,'#c09a61');}
+  if(id==='leaves'){rect(c,10,5,4,14,'#527c43');rect(c,5,7,7,5,'#79a65f');rect(c,12,6,7,5,'#91b96b');rect(c,4,14,8,5,'#668f4e');rect(c,12,13,8,5,'#82a95a');}
+  if(id==='pickaxe'){rect(c,10,6,3,17,'#af8350');rect(c,11,7,1,15,'#dcc18a');rect(c,5,4,14,4,'#a4b7ad');rect(c,2,7,5,4,'#758e86');rect(c,18,7,4,4,'#758e86');rect(c,7,4,10,1,'#d0d5b8');}
+  if(id==='stone'){rect(c,4,11,15,9,'#697565');rect(c,7,7,10,12,'#838b78');rect(c,8,7,8,3,'#b5b99f');rect(c,5,13,5,3,'#9da68c');rect(c,16,13,4,6,'#596657');}
+  return icon;
+}
+class Inventory{
+  constructor(){this.slots=Array.from({length:24},(_,i)=>i===0?{id:'pickaxe',qty:1}:i===1?{id:'axe',qty:1}:i===2?{id:'hoe',qty:1}:i===3?{id:'seeds',qty:1}:i===4?{id:'water',qty:1}:i===5?{id:'sickle',qty:1}:null);this.selected=-1;this.version=0;}
+  count(id){return this.slots.reduce((n,s)=>n+(s&&s.id===id?s.qty:0),0);}
+  add(id,qty=1){if(!ITEMS[id]||!Number.isInteger(qty)||qty<=0)return false;const stack=this.slots.find(s=>s&&s.id===id);if(stack)stack.qty+=qty;else{const empty=this.slots.indexOf(null);if(empty<0)return false;this.slots[empty]={id,qty};}this.version++;return true;}
+  remove(id,qty=1){if(!Number.isInteger(qty)||qty<=0||this.count(id)<qty)return false;for(let i=0;i<this.slots.length&&qty>0;i++){const s=this.slots[i];if(s?.id!==id)continue;const n=Math.min(qty,s.qty);s.qty-=n;qty-=n;if(!s.qty)this.slots[i]=null;}this.version++;return true;}
+  select(i){if(!Number.isInteger(i)||i<0||i>=this.slots.length)return;this.selected=i;this.version++;}
+  swap(a,b){if(!Number.isInteger(a)||!Number.isInteger(b)||a<0||b<0||a>=24||b>=24)return false;[this.slots[a],this.slots[b]]=[this.slots[b],this.slots[a]];this.selected=b;this.version++;return true;}
+}
+class Hotbar{
+  constructor(inventory){this.inventory=inventory;this.slots=['pickaxe','axe','hoe','seeds','water','sickle',null,null,null];this.selected=0;this.version=0;}
+  select(i){if(!Number.isInteger(i)||i<0||i>=9)return;this.selected=i;this.version++;}
+  assign(i,id){if(!Number.isInteger(i)||i<0||i>=9||!ITEMS[id]||!this.inventory.count(id))return false;const previous=this.slots.indexOf(id);if(previous===i)return true;if(previous>=0)this.slots[previous]=this.slots[i];this.slots[i]=id;this.version++;return true;}
+  swap(a,b){if(!Number.isInteger(a)||!Number.isInteger(b)||a<0||b<0||a>=9||b>=9)return false;[this.slots[a],this.slots[b]]=[this.slots[b],this.slots[a]];this.version++;return true;}
+  unregister(i){if(!Number.isInteger(i)||i<0||i>=9||!this.slots[i])return false;this.slots[i]=null;this.version++;return true;}
+  clear(){return this.unregister(this.selected);}
+  get active(){const id=this.slots[this.selected];return id&&this.inventory.count(id)>0?id:null;}
+}
+class InventoryUI{
+  constructor(g){this.game=g;this.open=false;this.signature='';this.dragSource=null;this.sidebar=document.getElementById('sidebar');this.grid=document.getElementById('bag-grid');this.bag=document.getElementById('bag');
+    document.getElementById('open-bag').addEventListener('click',()=>this.toggle());document.getElementById('close-bag').addEventListener('click',()=>this.toggle(false));
+    document.getElementById('assign-selected').addEventListener('click',()=>this.assignSelected(g.hotbar.selected));
+    document.getElementById('clear-shortcut').addEventListener('click',()=>{g.hotbar.clear();this.render();g.ui.message('Đã gỡ lối tắt. Vật phẩm vẫn ở trong túi.');});
+    document.addEventListener('dragover',e=>{if(this.dragSource?.kind==='hotbar'&&!this.sidebar.contains(e.target)){e.preventDefault();e.dataTransfer.dropEffect='move';}});
+    document.addEventListener('drop',e=>{const source=this.dragSource;if(!source||source.kind!=='hotbar'||this.sidebar.contains(e.target))return;e.preventDefault();this.finishDrag();if(g.hotbar.slots[source.index]===source.id)this.transfer(source,'unregister');});
+    const aim=e=>{if(e.pointerType==='touch')return;const bounds=canvas.getBoundingClientRect();g.pointer={x:(e.clientX-bounds.left)*VIEW_W/bounds.width,y:(e.clientY-bounds.top)*VIEW_H/bounds.height};};
+    canvas.addEventListener('pointermove',aim);canvas.addEventListener('pointerleave',()=>{g.pointer=null;});
+    canvas.addEventListener('contextmenu',e=>e.preventDefault());canvas.addEventListener('pointerdown',e=>{if(this.open||e.button!==2)return;e.preventDefault();aim(e);canvas.focus({preventScroll:true});g.input.pressed.add('UseItem');});
+  }
+  finishDrag(){this.dragSource=null;document.getElementById('unregister-hint').hidden=true;}
+  toggle(value=!this.open){this.open=value;this.bag.hidden=!value;this.game.input.clear();this.render();if(value)document.getElementById('close-bag').focus({preventScroll:true});else canvas.focus({preventScroll:true});}
+  assignSelected(i){const g=this.game,item=g.inventory.slots[g.inventory.selected];if(item&&g.hotbar.assign(i,item.id)){g.ui.message('Đã gán '+ITEMS[item.id].name+' vào ô '+(i+1)+'.');g.hotbar.select(i);}else g.ui.message('Chọn vật phẩm trong túi trước.');this.render();}
+  transfer(source,target,index){const g=this.game;if(!source||!Number.isInteger(source.index))return false;
+    let ok=false;if(target==='hotbar'){if(source.kind==='bag'){const item=g.inventory.slots[source.index];ok=!!item&&g.hotbar.assign(index,item.id);}else if(source.kind==='hotbar')ok=g.hotbar.swap(source.index,index);}
+    else if(target==='bag'&&source.kind==='bag')ok=g.inventory.swap(source.index,index);
+    else if((target==='bag'||target==='unregister')&&source.kind==='hotbar')ok=g.hotbar.unregister(source.index);
+    if(ok){this.render();g.ui.message(source.kind==='hotbar'&&target!=='hotbar'?'Đã gỡ lối tắt. Vật phẩm vẫn ở trong túi.':target==='hotbar'?'Lối tắt đã chuyển vị trí. Vật phẩm vẫn ở trong túi.':'Đã sắp xếp túi đồ.');}return ok;
+  }
+  slot(kind,i){const g=this.game,inv=g.inventory,bar=g.hotbar,id=kind==='bag'?inv.slots[i]?.id:bar.slots[i],qty=id?inv.count(id):0,item=id&&qty>0?{id,qty}:null,b=document.createElement('button');b.type='button';b.className='slot'+((kind==='bag'?inv.selected:bar.selected)===i?' selected':'');b.setAttribute('aria-pressed',String((kind==='bag'?inv.selected:bar.selected)===i));const name=item?ITEMS[id].name:'Ô trống';b.title=(kind==='bag'?'Túi ':'Phím ')+(i+1)+': '+name+(kind==='bag'?' · Kéo sang thanh công cụ':' · Chuột phải để dùng');b.setAttribute('aria-label',b.title);const key=document.createElement('span');key.className='slot-key';key.textContent=i+1;b.appendChild(key);
+    if(item){b.appendChild(itemIcon(id));const n=document.createElement('span');n.className='slot-qty';n.textContent=qty===Infinity?'∞':qty;b.appendChild(n);}else{const empty=document.createElement('span');empty.className='bag-empty';empty.textContent='·';b.appendChild(empty);}
+    b.draggable=!!item;b.addEventListener('dragstart',e=>{if(!item){e.preventDefault();return;}this.dragSource={kind,index:i,id};document.getElementById('unregister-hint').hidden=kind!=='hotbar';e.dataTransfer.effectAllowed=kind==='bag'?'copyMove':'move';e.dataTransfer.setData('text/plain',JSON.stringify({kind,index:i}));});
+    b.addEventListener('dragend',()=>this.finishDrag());
+    b.addEventListener('dragover',e=>{e.preventDefault();b.classList.add('drop-target');});b.addEventListener('dragleave',()=>b.classList.remove('drop-target'));
+    b.addEventListener('drop',e=>{e.preventDefault();e.stopPropagation();b.classList.remove('drop-target');const source=this.dragSource;this.finishDrag();if(source)this.transfer(source,kind,i);});
+    b.addEventListener('click',()=>{if(kind==='bag')inv.select(i);else{bar.select(i);if(this.open&&inv.selected>=0)this.assignSelected(i);}this.render();if(!this.open)canvas.focus({preventScroll:true});});
+    b.addEventListener('contextmenu',e=>{e.preventDefault();if(this.open||kind!=='hotbar')return;bar.select(i);this.render();g.input.pressed.add('UseItem');canvas.focus({preventScroll:true});});return b;
+  }
+  render(){const g=this.game,inv=g.inventory,bar=g.hotbar,signature=inv.version+':'+bar.version+':'+this.open;if(this.model===inv&&this.signature===signature)return;this.model=inv;this.signature=signature;this.sidebar.replaceChildren();this.grid.replaceChildren();const title=document.createElement('div');title.className='side-title';title.textContent='CÔNG CỤ';this.sidebar.appendChild(title);for(let i=0;i<9;i++)this.sidebar.appendChild(this.slot('hotbar',i));for(let i=0;i<inv.slots.length;i++)this.grid.appendChild(this.slot('bag',i));
+    const item=inv.slots[inv.selected];document.getElementById('item-description').textContent=item?ITEMS[item.id].name+' · '+ITEMS[item.id].description:'Chọn đồ trong túi rồi kéo sang thanh bên; hoặc chọn ô 1–9 và nhấn Gán lối tắt.';
+    document.getElementById('assign-selected').textContent='Gán vào ô '+(bar.selected+1);document.getElementById('bag-capacity').textContent='Túi đồ · '+inv.slots.filter(Boolean).length+'/24 ô';
+  }
+}
+
+// INPUT — edge-triggered interactions; clear held keys on focus loss.
+class Input{
+  constructor(){this.keys=new Set();this.pressed=new Set();const known=['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowLeft','ArrowDown','ArrowRight','KeyE','KeyI','Escape',...Array.from({length:9},(_,i)=>'Digit'+(i+1))];
+    window.addEventListener('keydown',e=>{if(!known.includes(e.code))return;e.preventDefault();if(!this.keys.has(e.code))this.pressed.add(e.code);this.keys.add(e.code);});
+    window.addEventListener('keyup',e=>this.keys.delete(e.code));
+    window.addEventListener('blur',()=>this.clear());document.addEventListener('visibilitychange',()=>this.clear());
+    document.querySelectorAll('[data-key]').forEach(b=>{b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);const k=b.dataset.key;this.keys.add(k);this.pressed.add(k);});for(const event of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(event,()=>this.keys.delete(b.dataset.key));});
+  }
+  clear(){this.keys.clear();this.pressed.clear();}
+  down(...keys){return keys.some(k=>this.keys.has(k));}
+  consume(key){const hit=this.pressed.has(key);this.pressed.delete(key);return hit;}
+}
+
+// COLLISION — small substeps and axis separation prevent tunneling & wall sticking.
+class Collision{
+  static overlaps(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;}
+  static move(p,dx,dy,world){const steps=Math.max(1,Math.ceil(Math.max(Math.abs(dx),Math.abs(dy))/5));for(let i=0;i<steps;i++){p.x+=dx/steps;if(world.blocked(p.bounds()))p.x-=dx/steps;p.y+=dy/steps;if(world.blocked(p.bounds()))p.y-=dy/steps;}}
+}
+
+// WORLD — 48 × 34 tiles, hand-arranged landmarks, seeded ground detail.
+class World{
+  constructor(){this.w=48*TILE;this.h=34*TILE;this.objects=[];this.solids=[];this.door={x:368,y:441};
+    this.add('cottage',256,256,224,176,{x:268,y:295,w:200,h:133});
+    for(let row=0;row<34;row++)for(let col=0;col<48;col++){
+      if(col<2||col>45||row<2||row>31||((row<6||col>42)&&hash(col,row)>.35))this.add('tree',col*32+16,row*32+24,0,0,{x:col*32+5,y:row*32+9,w:23,h:22});
+    }
+    [[6,8],[5,13],[7,21],[10,24],[16,7],[20,6],[33,7],[37,11],[39,21],[35,27],[24,28],[17,27],[4,25],[41,28],[29,5]].forEach(([x,y])=>this.add('tree',x*32,y*32,0,0,{x:x*32-11,y:y*32-9,w:22,h:26}));
+    // Garden boundary has an open, two-tile gate on its west side.
+    for(let x=22;x<=33;x++){this.fence(x,12);this.fence(x,22);}
+    for(let y=13;y<22;y++){if(y!==17&&y!==18)this.fence(22,y);this.fence(33,y);}
+    [[7,17],[17,13],[19,23],[35,17],[36,24],[13,28]].forEach(([x,y])=>this.add('rock',x*32,y*32,0,0,{x:x*32-12,y:y*32-10,w:25,h:21}));
+    [[6,16],[8,16],[18,9],[35,12],[36,13],[34,24],[15,25],[27,26],[12,7]].forEach(([x,y])=>this.add('bush',x*32,y*32,0,0,{x:x*32-13,y:y*32-7,w:27,h:18}));
+    this.add('campfire',544,608,0,0,{x:530,y:598,w:28,h:24});
+    this.add('sign',661,557,0,0,{x:656,y:550,w:10,h:12});
+    this.add('well',1040,800,0,0,{x:1022,y:780,w:36,h:37});
+    this.ground=document.createElement('canvas');this.ground.width=this.w;this.ground.height=this.h;this.paintGround(this.ground.getContext('2d'));
+  }
+  add(type,x,y,w,h,solid){this.objects.push({type,x,y,w,h,solid,depth:type==='cottage'?y+h:y});if(solid)this.solids.push(solid);}
+  targetRock(player,point=null){let best=null,distance=65;for(const o of this.objects){if(o.type!=='rock')continue;const d=Math.hypot(player.x-o.x,player.y-o.y);if(d>64)continue;if(point&&(point.x<o.x-16||point.x>o.x+16||point.y<o.y-16||point.y>o.y+14))continue;if(d<distance){best=o;distance=d;}}return best;}
+  targetTree(player,point=null){let best=null,distance=65;for(const o of this.objects){if(o.type!=='tree')continue;const d=Math.hypot(player.x-o.x,player.y-o.y);if(d>64)continue;if(point&&(point.x<o.x-30||point.x>o.x+30||point.y<o.y-88||point.y>o.y+16))continue;if(d<distance){best=o;distance=d;}}return best;}
+  chopTree(tree,player,drops){
+    if(!tree||tree.type!=='tree'||!this.objects.includes(tree)||Math.hypot(player.x-tree.x,player.y-tree.y)>64)return 'Đứng gần cây (tối đa 2 ô), trỏ vào cây rồi chuột phải để chặt.';
+    drops.push({id:'wood',qty:2,x:tree.x,y:tree.y},{id:'leaves',qty:3,x:tree.x+20,y:tree.y});
+    this.objects.splice(this.objects.indexOf(tree),1);const index=this.solids.indexOf(tree.solid);if(index>=0)this.solids.splice(index,1);
+    return 'Đã chặt cây! 2 gỗ và 3 lá rơi ra. Đứng gần rồi nhấn E để nhặt.';
+  }
+  mineRock(rock,player,drops){
+    if(!rock||rock.type!=='rock'||!this.objects.includes(rock)||Math.hypot(player.x-rock.x,player.y-rock.y)>64)return 'Đứng gần tảng đá (tối đa 2 ô), trỏ chuột vào đá rồi chuột phải để đập.';
+    drops.push({id:'stone',qty:3,x:rock.x,y:rock.y});
+    this.objects.splice(this.objects.indexOf(rock),1);const index=this.solids.indexOf(rock.solid);if(index>=0)this.solids.splice(index,1);
+    return 'Đã đập đá! 3 đá nhỏ rơi ra. Đứng gần rồi nhấn E để nhặt.';
+  }
+  fence(x,y){this.add('fence',x*32,y*32,32,24,{x:x*32,y:y*32+7,w:32,h:13});}
+  blocked(b){return b.x<32||b.y<32||b.x+b.w>this.w-32||b.y+b.h>this.h-32||this.solids.some(s=>Collision.overlaps(b,s));}
+  paintGround(c){
+    for(let y=0;y<34;y++)for(let x=0;x<48;x++){
+      const px=x*32,py=y*32,n=hash(x,y);rect(c,px,py,32,32,n>.7?'#5c7d4d':n<.18?'#557548':PALETTE.grass);
+      for(let k=0;k<5;k++){const a=hash(x,y,k+1),b=hash(y,x,k+15);rect(c,px+Math.floor(a*29),py+Math.floor(b*29),2,3,k%2?'#6c8954':'#4c6e43');}
+      const path=(y>=14&&y<=19&&x>=10&&x<=22)||(x>=10&&x<=12&&y>=13&&y<=28)||(y>=24&&y<=26&&x>=11&&x<=32);
+      const garden=x>=23&&x<=32&&y>=13&&y<=21;
+      if(path||garden){rect(c,px,py,32,32,garden?'#9c8960':'#b09a6c');for(let k=0;k<6;k++)rect(c,px+Math.floor(hash(x,y,k+30)*29),py+Math.floor(hash(y,x,k+90)*29),2,2,k%2?'#c1a976':'#94835c');}
+      if(!path&&!garden&&n>.81&&x>2&&y>3){const a=px+8+Math.floor(n*10),b=py+14;rect(c,a,b,2,7,'#3f6540');rect(c,a-2,b,6,2,n>.92?'#e6c775':'#d2c5a0');rect(c,a,b-2,2,6,n>.92?'#e6c775':'#d2c5a0');}
+    }
+    // Worn stone walk from the front door, and warm cottage doorstep.
+    for(let y=432;y<572;y+=25){rect(c,346+(y%3)*2,y,39,18,'#7b7f67');rect(c,348+(y%3)*2,y+1,34,12,'#a8a58a');rect(c,352,y+3,17,2,'#bdb698');}
+    rect(c,345,424,48,13,'#615e4b');rect(c,347,424,44,5,'#aaa082');
+    for(let x=284;x<450;x+=34){rect(c,x,455,18,13,'#4b683f');rect(c,x+3,449,2,10,'#86a86a');rect(c,x+10,447,2,11,'#86a86a');rect(c,x+1,447,6,3,'#b1acdf');rect(c,x+8,444,6,3,'#c9b8e1');}
+  }
+  drawObject(c,o,t){const x=o.x,y=o.y;
+    if(o.type==='tree'){
+      shadow(c,x,y+15,44);rect(c,x-6,y-13,13,30,'#574b35');rect(c,x-3,y-10,4,24,'#8c7145');rect(c,x+6,y+8,6,6,'#574b35');
+      rect(c,x-28,y-47,56,28,'#233f32');rect(c,x-23,y-64,47,35,'#294e37');rect(c,x-17,y-78,34,25,'#355e3e');rect(c,x-11,y-85,22,13,'#426d44');
+      rect(c,x-26,y-43,18,11,'#355d3d');rect(c,x-17,y-62,14,8,'#487548');rect(c,x-8,y-77,12,5,'#59834e');rect(c,x+10,y-38,14,7,'#3c6540');rect(c,x-18,y-29,22,5,'#2b4d34');
+    }else if(o.type==='cottage'){
+      shadow(c,x+113,y+175,234);rect(c,x+9,y+65,208,108,'#514d3b');rect(c,x+13,y+67,200,97,'#baaa78');
+      for(let yy=y+74;yy<y+157;yy+=18){rect(c,x+17,yy,192,2,'#a08b60');for(let xx=x+22+(yy%4)*8;xx<x+200;xx+=41)rect(c,xx,yy-15,2,14,'#ac976a');}
+      rect(c,x+9,y+74,9,91,'#674b35');rect(c,x+205,y+73,9,92,'#674b35');rect(c,x+14,y+151,197,9,'#71553b');
+      rect(c,x+161,y-16,23,55,'#777463');rect(c,x+158,y-19,29,8,'#aaa189');rect(c,x+166,y-7,7,3,'#a09a81');
+      for(let i=0;i<7;i++){let yy=y+i*11,xx=x+37-i*7,ww=150+i*14;rect(c,xx,yy,ww,14,i%2?'#80533c':'#916145');rect(c,xx+3,yy,ww-6,3,'#ac7950');for(let j=xx+14;j<xx+ww-5;j+=25)rect(c,j,yy+3,2,8,'#694b38');}
+      rect(c,x-7,y+75,238,7,'#533f32');rect(c,x+93,y+105,39,59,'#503b2c');rect(c,x+98,y+109,29,55,'#705035');for(let xx=x+102;xx<x+126;xx+=8)rect(c,xx,y+111,2,49,'#8a6540');rect(c,x+119,y+137,4,4,'#d2b46d');
+      for(const xx of [x+34,x+158]){rect(c,xx,y+103,31,31,'#604b35');rect(c,xx+4,y+107,23,23,'#e1b96b');rect(c,xx+6,y+109,8,8,'#f0d18a');rect(c,xx+14,y+107,3,23,'#77573b');rect(c,xx+4,y+118,23,3,'#77573b');rect(c,xx-3,y+133,37,6,'#77563a');rect(c,xx,y+130,31,4,'#4e7042');}
+      rect(c,x+74,y+86,78,14,'#4d4c33');c.fillStyle='#e6d5a0';c.font='8px monospace';c.textAlign='center';c.fillText('WILDROOT',x+113,y+96);
+    }else if(o.type==='fence'){
+      rect(c,x,y+5,32,5,'#684c35');rect(c,x,y+15,32,4,'#684c35');rect(c,x,y+4,32,3,'#b19260');rect(c,x,y+13,32,3,'#9b7c51');rect(c,x+2,y,5,26,'#705239');rect(c,x+2,y,4,3,'#c4a574');
+    }else if(o.type==='rock'){
+      shadow(c,x,y+11,30);rect(c,x-14,y-6,28,16,'#636d62');rect(c,x-9,y-13,18,22,'#838b78');rect(c,x-7,y-13,14,4,'#a7ab8d');rect(c,x+7,y-5,8,13,'#697565');rect(c,x-7,y-5,6,3,'#919b7c');
+    }else if(o.type==='bush'){
+      shadow(c,x,y+11,31);rect(c,x-15,y-9,31,17,'#355d3a');rect(c,x-9,y-16,19,24,'#497a45');rect(c,x-6,y-16,11,5,'#6b9254');for(let i=0;i<4;i++)rect(c,x-10+i*7,y-4-(i%2)*6,3,3,'#c5a375');
+    }else if(o.type==='campfire'){
+      shadow(c,x,y+13,39);for(let i=0;i<8;i++){let a=i*Math.PI/4;rect(c,x+Math.round(Math.cos(a)*17)-4,y+Math.round(Math.sin(a)*10)-2,8,6,i%2?'#a3a28a':'#727b68');}
+      rect(c,x-12,y+4,27,5,'#614731');rect(c,x-10,y+7,24,4,'#8c6441');const flick=Math.floor(t*7)%3;rect(c,x-8,y-12-flick*2,16,20+flick*2,'#ca743b');rect(c,x-3,y-20+flick*2,7,26-flick*2,'#e7b952');rect(c,x-2,y-8,5,13,'#f4d98a');rect(c,x+7,y-22-(t*10%9),2,2,'#e3bb6b');
+    }else if(o.type==='sign'){
+      rect(c,x-2,y-7,5,20,'#644b33');rect(c,x-23,y-22,45,18,'#655037');rect(c,x-21,y-20,41,13,'#b4925c');c.font='8px monospace';c.textAlign='center';c.fillStyle='#423f2c';c.fillText('GARDEN →',x,y-10);
+    }else if(o.type==='well'){
+      shadow(c,x,y+18,45);rect(c,x-20,y-5,40,24,'#6c7567');rect(c,x-16,y-9,32,8,'#b0aa8c');rect(c,x-11,y-7,22,6,'#304a45');rect(c,x-22,y-34,4,45,'#72563a');rect(c,x+18,y-34,4,45,'#72563a');rect(c,x-27,y-39,54,8,'#946a44');rect(c,x-20,y-45,40,6,'#ad8251');rect(c,x-3,y-30,2,28,'#c4b687');rect(c,x-16,y+6,12,3,'#949984');
+    }
+  }
+}
+
+// PLAYER — position is the centre of the feet; collision follows the feet.
+class Player{
+  constructor(){this.x=368;this.y=482;this.facing='down';this.walk=0;this.moving=false;this.speed=138;}
+  bounds(){return{x:this.x-9,y:this.y-8,w:18,h:15};}
+  update(dt,input,world){let dx=Number(input.down('KeyD','ArrowRight'))-Number(input.down('KeyA','ArrowLeft')),dy=Number(input.down('KeyS','ArrowDown'))-Number(input.down('KeyW','ArrowUp'));this.moving=!!(dx||dy);if(!this.moving){this.walk=0;return;}if(dx)this.facing=dx>0?'right':'left';if(dy)this.facing=dy>0?'down':'up';const length=Math.hypot(dx,dy);Collision.move(this,dx/length*this.speed*dt,dy/length*this.speed*dt,world);this.walk+=dt*10;}
+  draw(c){const x=Math.round(this.x),y=Math.round(this.y),step=this.moving?Math.round(Math.sin(this.walk)*2):0,bob=this.moving?Math.abs(step)%2:0;
+    shadow(c,x,y+5,24);rect(c,x-7,y-4,6,9+step,'#423c31');rect(c,x+2,y-4,6,9-step,'#423c31');rect(c,x-8,y+2+step,7,4,'#3c362e');rect(c,x+2,y+2-step,8,4,'#3c362e');
+    rect(c,x-9,y-23-bob,18,22,'#374f42');rect(c,x-6,y-22-bob,13,16,'#83976a');rect(c,x-7,y-7-bob,15,4,'#a48b59');rect(c,x-10,y-20-bob,4,13,'#5b7654');rect(c,x+8,y-20-bob,4,13,'#5b7654');rect(c,x-10,y-8-bob+step,4,5,'#d7b487');rect(c,x+8,y-8-bob-step,4,5,'#d7b487');
+    rect(c,x-7,y-37-bob,15,15,'#6c5138');rect(c,x-6,y-32-bob,13,12,'#ddbb8c');
+    if(this.facing==='up'){rect(c,x-7,y-33-bob,15,12,'#71563b');rect(c,x-7,y-24-bob,4,7,'#71563b');}
+    else if(this.facing==='left'){rect(c,x-7,y-28-bob,2,3,'#343f32');rect(c,x+2,y-33-bob,6,13,'#71563b');rect(c,x-9,y-25-bob,3,4,'#ddbb8c');}
+    else if(this.facing==='right'){rect(c,x+5,y-28-bob,2,3,'#343f32');rect(c,x-7,y-33-bob,6,13,'#71563b');rect(c,x+7,y-25-bob,3,4,'#ddbb8c');}
+    else{rect(c,x-4,y-28-bob,2,3,'#343f32');rect(c,x+3,y-28-bob,2,3,'#343f32');rect(c,x-1,y-22-bob,3,1,'#aa7859');}
+    rect(c,x-12,y-36-bob,26,5,'#4c6041');rect(c,x-8,y-45-bob,17,11,'#7f9060');rect(c,x-7,y-37-bob,17,3,'#c6b17a');rect(c,x+7,y-45-bob,3,9,'#a8b780');
+    if(this.facing==='up'){rect(c,x-6,y-19-bob,12,13,'#aa8b5d');rect(c,x-4,y-18-bob,8,4,'#d0b17b');rect(c,x-2,y-11-bob,3,4,'#6f583d');}
+    else{rect(c,x+4,y-8-bob,7,8,'#a48453');rect(c,x+5,y-10-bob,5,3,'#cfb078');}
+  }
+}
+
+// CAMERA — clamped to the world; integer rendering keeps the pixels crisp.
+class Camera{
+  constructor(p,w){this.x=0;this.y=0;this.snap(p,w);}
+  target(p,w){return{x:Math.max(0,Math.min(w.w-VIEW_W,p.x-VIEW_W/2)),y:Math.max(0,Math.min(w.h-VIEW_H,p.y-VIEW_H/2))};}
+  snap(p,w){Object.assign(this,this.target(p,w));}
+  update(dt,p,w){const a=1-Math.exp(-7*dt),target=this.target(p,w);this.x+=(target.x-this.x)*a;this.y+=(target.y-this.y)*a;}
+}
+
+// FARMING — hard soil → tilled soil → planted → watered → ready → tilled soil.
+class Foraging{
+  constructor(world,player){this.world=world;this.plants=[];this.spawnTimer=7;this.candidates=[];for(let row=4;row<30;row++)for(let col=3;col<44;col++){const x=col*32+16,y=row*32+16;if(!world.blocked({x:x-9,y:y-9,w:18,h:18}))this.candidates.push({x,y});}for(let i=0;i<18;i++)this.spawn();}
+  spawn(){const free=this.candidates.filter(p=>this.plants.every(q=>Math.hypot(q.x-p.x,q.y-p.y)>70));if(!free.length)return false;const p=free[Math.floor(Math.random()*free.length)],ids=Object.keys(CROPS);this.plants.push({x:p.x,y:p.y,id:ids[Math.floor(Math.random()*ids.length)]});return true;}
+  update(dt){this.spawnTimer-=dt;if(this.spawnTimer<=0){this.spawnTimer=7;if(this.plants.length<30)this.spawn();}}
+  nearest(player){let best=null,distance=48;for(const p of this.plants){const d=Math.hypot(p.x-player.x,p.y-player.y);if(d<distance){best=p;distance=d;}}return best;}
+  pickup(plant,inventory){if(!plant||!this.plants.includes(plant))return 'Không có hoa dại ở gần để nhặt.';if(!inventory.add(plant.id,1))return 'Túi đồ đầy.';this.plants.splice(this.plants.indexOf(plant),1);return 'Đã nhặt '+ITEMS[plant.id].name+'.';}
+  draw(c,player){const nearest=this.nearest(player);for(const p of this.plants){const crop=CROPS[p.id];shadow(c,p.x,p.y+3,16);rect(c,p.x,p.y-12,2,13,crop.leaf);rect(c,p.x-5,p.y-14,6,4,crop.light);rect(c,p.x+2,p.y-17,6,4,crop.flower);if(p===nearest){c.strokeStyle='#ead59b';c.strokeRect(p.x-9,p.y-21,19,27);}}}
+}
+// UI — derives instructions and tools directly from current gameplay state.
+class UI{
+ constructor(){this.objective=document.getElementById('objective');this.prompt=document.getElementById('prompt');this.tool=document.getElementById('tool');this.toast=document.getElementById('toast');this.toastTime=0;this.last='';}
+ message(text){this.toast.textContent=text;this.toastTime=4;this.toast.classList.add('show');}
+ update(dt,g){this.toastTime-=dt;if(this.toastTime<=0)this.toast.classList.remove('show');const drop=g.farming.nearestDrop(g.player),active=g.hotbar.active;this.objective.textContent='Phím 2 chọn rìu, đứng gần cây rồi trỏ vào cây và nhấn chuột phải để chặt.';let text='WASD di chuyển · E nhặt đồ · Chuột phải dùng công cụ';if(active==='axe')text=g.treeTarget?'Chuột phải · Chặt cây, rơi 2 gỗ và 3 lá':'Đứng gần thân cây · Chuột phải để chặt';else if(active==='pickaxe')text=g.rockTarget?'Chuột phải · Đập đá':'Đứng gần và trỏ vào đá để đập';else if(drop)text='E · Nhặt '+ITEMS[drop.id].name+' ×'+drop.qty;if(text!==this.last){this.prompt.textContent=text;this.last=text;}document.getElementById('land-count').textContent='';this.tool.textContent='Ô '+(g.hotbar.selected+1)+' · '+(active?ITEMS[active].name:'Trống');}
+}
+
+// GAME — gameplay updates and world rendering remain separate.
+class Game{
+  constructor(){this.input=new Input();this.ui=new UI();this.inventoryUI=new InventoryUI(this);this.lastTime=0;this.reset();document.getElementById('restart').addEventListener('click',()=>{this.reset();canvas.focus({preventScroll:true});});this.frame=this.frame.bind(this);requestAnimationFrame(this.frame);}
+  reset(){this.inventoryUI.finishDrag();this.world=new World();this.player=new Player();this.camera=new Camera(this.player,this.world);this.inventory=new Inventory();this.hotbar=new Hotbar(this.inventory);this.farming={drops:[],nearestDrop(player){let best=null,d=56;for(const item of this.drops){const n=Math.hypot(player.x-item.x,player.y-item.y);if(n<d){best=item;d=n;}}return best;},pickup(player,inventory){const item=this.nearestDrop(player);if(!item)return 'Kh?ng c? v?t ph?m ? g?n ?? nh?t.';if(!inventory.add(item.id,item.qty))return 'T?i ?? ??y. V?t ph?m v?n ? nguy?n ch? c?.';this.drops.splice(this.drops.indexOf(item),1);return '?? nh?t '+item.qty+' '+ITEMS[item.id].name+'.';},drawDrops(c,player,time){for(const d of this.drops){const bob=Math.round(Math.sin(time*3)*2);shadow(c,d.x,d.y+8,18);const icon=itemIcon(d.id);c.drawImage(icon,d.x-12,d.y-12+bob);if(d===this.nearestDrop(player)){c.strokeStyle='#f0d98f';c.strokeRect(d.x-13,d.y-13+bob,26,26);}}}};this.foraging=new Foraging(this.world,this.player);this.pointer=null;this.target=null;this.rockTarget=null;this.time=0;this.input.clear();this.inventoryUI.open=false;this.inventoryUI.bag.hidden=true;this.ui.message('Hoa thuốc mọc quanh nông trại. Nhấn E để nhặt hoa · 25% có thêm hạt giống.');this.ui.update(0,this);this.inventoryUI.render();}
+  useActive(){const p=this.target,id=this.hotbar.active;
+    if(!id){this.ui.message('Ô công cụ trống. Mở túi I và kéo vật phẩm sang thanh bên.');return;}
+    if(id==='axe'){const tree=this.world.targetTree(this.player,this.aimPoint());this.ui.message(this.world.chopTree(tree,this.player,this.farming.drops));this.treeTarget=this.world.targetTree(this.player,this.aimPoint());return;}
+    if(id==='pickaxe'){const rock=this.world.targetRock(this.player,this.aimPoint());this.ui.message(this.world.mineRock(rock,this.player,this.farming.drops));this.rockTarget=this.world.targetRock(this.player,this.aimPoint());return;}
+    this.ui.message('Hãy chọn cuốc chim hoặc rìu để khai thác.');
+  }
+  aimPoint(){return this.pointer?{x:this.pointer.x+Math.round(this.camera.x),y:this.pointer.y+Math.round(this.camera.y)}:null;}
+  update(dt){
+    if(this.input.consume('KeyI'))this.inventoryUI.toggle();else if(this.input.consume('Escape')&&this.inventoryUI.open)this.inventoryUI.toggle(false);
+    for(let i=0;i<9;i++)if(this.input.consume('Digit'+(i+1)))this.hotbar.select(i);
+    this.inventoryUI.render();
+    if(this.inventoryUI.open){this.player.moving=false;this.player.walk=0;this.input.pressed.clear();this.ui.update(dt,this);return;}
+    this.time+=dt;this.player.update(dt,this.input,this.world);this.camera.update(dt,this.player,this.world);this.foraging.update(dt);const mining=this.hotbar.active==='pickaxe',chopping=this.hotbar.active==='axe';this.target=mining||chopping?null:null;this.rockTarget=mining?this.world.targetRock(this.player,this.aimPoint()):null;this.treeTarget=chopping?this.world.targetTree(this.player,this.aimPoint()):null;
+    if(this.input.consume('UseItem'))this.useActive();
+    if(this.input.consume('KeyE')){const wild=this.foraging.nearest(this.player),drop=this.farming.nearestDrop(this.player),dist=p=>Math.hypot(p.x-this.player.x,p.y-this.player.y);this.ui.message(wild&&(!drop||dist(wild)<dist(drop))?this.foraging.pickup(wild,this.inventory):this.farming.pickup(this.player,this.inventory));}
+    this.input.pressed.clear();this.ui.update(dt,this);this.inventoryUI.render();
+  }
+  render(){ctx.clearRect(0,0,VIEW_W,VIEW_H);ctx.save();const cx=Math.round(this.camera.x),cy=Math.round(this.camera.y);ctx.translate(-cx,-cy);ctx.drawImage(this.world.ground,0,0);
+    this.foraging.draw(ctx,this.player,this.time);this.farming.drawDrops(ctx,this.player,this.time);
+    const items=this.world.objects.filter(o=>o.x>cx-250&&o.x<cx+VIEW_W+100&&o.y>cy-60&&o.y<cy+VIEW_H+110).map(o=>({depth:o.depth,object:o}));items.push({depth:this.player.y,player:true});items.sort((a,b)=>a.depth-b.depth);for(const item of items){if(item.player)this.player.draw(ctx);else this.world.drawObject(ctx,item.object,this.time);}
+    if(this.hotbar.active==='pickaxe'&&this.rockTarget){const o=this.rockTarget;ctx.strokeStyle='#f2d898';ctx.strokeRect(o.x-17.5,o.y-17.5,35,33);}
+    if(this.hotbar.active==='axe'&&this.treeTarget){const o=this.treeTarget;ctx.strokeStyle='#f2d898';ctx.strokeRect(o.x-31.5,o.y-87.5,63,105);}
+    // Slow drifting motes. Integer coordinates preserve the pixel grid.
+    for(let i=0;i<16;i++){const x=(hash(i,8)*this.world.w+this.time*5)%this.world.w,y=hash(i,9)*this.world.h+Math.sin(this.time+i)*5;rect(ctx,x,y,2,2,'#d9d6a555');}
+    ctx.restore();
+  }
+  frame(now){const dt=this.lastTime?Math.min((now-this.lastTime)/1000,.05):0;this.lastTime=now;this.update(dt);this.render();requestAnimationFrame(this.frame);}
+}
+const game=new Game();
+</script>
+</body>
+</html>
